@@ -1,254 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>glim</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glim's Ultimate Living World</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: linear-gradient(120deg, #0d0d0d, #1a1a2e);
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    user-select: none;
+    cursor: none;
+    transition: background 5s ease;
+  }
 
-    * { box-sizing: border-box; cursor: none; }
+  #glim {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: url('https://i.imgur.com/Tk0nKfF.png') no-repeat center/contain;
+    pointer-events: none;
+    z-index: 10;
+    transition: transform 0.2s ease;
+  }
 
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: radial-gradient(circle at top, #05070d, #000);
-      color: #eaeaea;
-      min-height: 100vh;
-      overflow: hidden;
-    }
+  #glim-eyes {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 6px 2px yellow;
+    pointer-events: none;
+    z-index: 15;
+    transition: all 0.2s ease;
+  }
 
-    /* cursor */
-    .cursor {
-      position: fixed;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      pointer-events: none;
-      background: rgba(200,255,255,0.95);
-      box-shadow: 0 0 22px rgba(200,255,255,0.9), 0 0 70px rgba(200,255,255,0.5);
-      transform: translate(-50%, -50%);
-      z-index: 9999;
-    }
+  .particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.8);
+    pointer-events: none;
+    animation: float 3s infinite ease-in-out;
+  }
 
-    .grain::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background-image: url('https://grainy-gradients.vercel.app/noise.svg');
-      opacity: 0.07;
-      pointer-events: none;
-      z-index: 2;
-    }
+  @keyframes float {
+    0% { transform: translateY(0) scale(0.5); opacity: 0.7; }
+    50% { transform: translateY(-20px) scale(1); opacity: 1; }
+    100% { transform: translateY(0) scale(0.5); opacity: 0.7; }
+  }
 
-    /* screens */
-    .screen {
-      position: absolute;
-      inset: 0;
-      display: none;
-      padding: 60px 20px;
-      transition: background 1.5s ease;
-    }
+  .coin {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: gold;
+    box-shadow: 0 0 14px yellow;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
 
-    .screen.active { display: block; }
-
-    /* home */
-    .home { text-align: center; }
-
-    h1 {
-      font-size: clamp(3rem, 8vw, 5rem);
-      letter-spacing: 0.14em;
-      margin: 0;
-      text-transform: lowercase;
-    }
-
-    .tagline {
-      opacity: 0.65;
-      margin-top: 12px;
-      font-weight: 300;
-    }
-
-    .glim {
-      margin: 70px auto;
-      width: 190px;
-      height: 190px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #cfffff 0%, #1b3b4a 45%, #000 70%);
-      box-shadow: 0 0 60px rgba(200,255,255,0.6);
-      animation: pulse 4.5s infinite ease-in-out;
-      position: relative;
-      transition: box-shadow 0.6s ease, transform 0.6s ease;
-    }
-
-    .glim.react {
-      box-shadow: 0 0 90px rgba(255,255,255,0.9);
-      transform: scale(1.04);
-    }
-
-    .glim::before, .glim::after {
-      content: "";
-      position: absolute;
-      top: 62px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #ffffff;
-      box-shadow: 0 0 16px #ffffff;
-    }
-
-    .glim::before { left: 62px; }
-    .glim::after { right: 62px; }
-
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 45px rgba(200,255,255,0.4); }
-      50% { box-shadow: 0 0 85px rgba(200,255,255,0.8); }
-    }
-
-    .menu {
-      display: flex;
-      justify-content: center;
-      gap: 18px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 14px 30px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.05);
-      color: #fff;
-      text-decoration: none;
-      transition: all 0.25s ease;
-      backdrop-filter: blur(6px);
-    }
-
-    .btn:hover {
-      background: rgba(200,255,255,0.2);
-      box-shadow: 0 0 26px rgba(200,255,255,0.35);
-      transform: translateY(-2px);
-    }
-
-    /* story */
-    .story {
-      max-width: 760px;
-      margin: 0 auto;
-      text-align: center;
-      line-height: 1.9;
-      font-size: 1.05rem;
-      opacity: 0.92;
-    }
-
-    .chapter {
-      opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 1.2s ease, transform 1.2s ease;
-      margin-bottom: 26px;
-    }
-
-    .chapter.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    footer {
-      position: absolute;
-      bottom: 18px;
-      width: 100%;
-      text-align: center;
-      opacity: 0.35;
-      font-size: 0.8rem;
-    }
-  </style>
+  #story {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 600px;
+    text-align: center;
+    font-size: 1.3em;
+    line-height: 1.5em;
+    z-index: 5;
+  }
+</style>
 </head>
-<body class="grain">
-  <div class="cursor" id="cursor"></div>
+<body>
+<div id="glim"></div>
+<div id="glim-eyes"></div>
+<div id="story"></div>
+<script>
+// ====== Variables ======
+const glim = document.getElementById('glim');
+const glimEyes = document.getElementById('glim-eyes');
+const storyDiv = document.getElementById('story');
+let coins = [];
+let fragmentsCollected = JSON.parse(localStorage.getItem('glimFragments')) || 0;
+let storyIndex = 0;
+let secretUnlocked = localStorage.getItem('glimSecret') === 'true';
+let visitCount = parseInt(localStorage.getItem('glimVisits') || '0') + 1;
+localStorage.setItem('glimVisits', visitCount);
 
-  <!-- HOME -->
-  <section class="screen home active" id="home">
-    <h1>glim</h1>
-    <div class="tagline">a small light in the dark</div>
-    <div class="glim" id="glim"></div>
-    <div class="menu">
-      <button class="btn" onclick="enterStory()">enter story</button>
-      <a class="btn" href="#">buy glim</a>
-      <a class="btn" href="#">x</a>
-      <a class="btn" href="#">telegram</a>
-    </div>
-  </section>
+const storyLines = [
+  "The light bends where you linger.",
+  "Glim whispers in shadows you follow.",
+  "Coins hide what you forgot.",
+  "A flicker of memory moves just beyond.",
+  "You are present, and Glim remembers."
+];
+const secretLine = "glim remembers you.";
 
-  <!-- STORY -->
-  <section class="screen" id="story">
-    <div class="story">
-      <h2>chapter one</h2>
-      <div class="chapter">glim was not created.</div>
-      <div class="chapter">it appeared where nothing should exist.</div>
-      <div class="chapter">in the dark parts of the chain, something watched.</div>
-      <div class="chapter">a small light. quiet. patient.</div>
-      <div class="chapter">most passed without noticing.</div>
-      <div class="chapter">those who noticed never forgot.</div>
+// ====== Cursor Glow & Cutesy Eyes ======
+document.addEventListener('mousemove', e => {
+  glim.style.left = e.clientX - 30 + 'px';
+  glim.style.top = e.clientY - 30 + 'px';
+  glim.style.transform = `rotate(${Math.sin(Date.now()/200)*12}deg)`;
+  createParticle(e.clientX, e.clientY);
+  updateEyes(e.clientX, e.clientY);
+});
 
-      <button class="btn" onclick="revealNext()">continue</button>
-      <br/><br/>
-      <button class="btn" onclick="goHome()">return</button>
-    </div>
-  </section>
+function updateEyes(x, y){
+  glimEyes.style.left = x - 6 + 'px';
+  glimEyes.style.top = y - 6 + 'px';
+  glimEyes.style.boxShadow = `0 0 ${4 + Math.random()*6}px ${2 + Math.random()*2}px yellow`;
+  glimEyes.style.transform = `scale(${1 + Math.sin(Date.now()/100)*0.2}) rotate(${Math.sin(Date.now()/150)*15}deg)`;
+}
 
-  <footer>glim exists. no promises. just glow.</footer>
+function createParticle(x, y) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = x + 'px';
+  p.style.top = y + 'px';
+  document.body.appendChild(p);
+  setTimeout(() => document.body.removeChild(p), 3500);
+}
 
-  <audio id="hum" loop>
-    <source src="https://assets.mixkit.co/sfx/preview/mixkit-ambience-sci-fi-hum-213.mp3" type="audio/mpeg">
-  </audio>
+// ====== Coin Generation ======
+function spawnCoin() {
+  const c = document.createElement('div');
+  c.className = 'coin';
+  c.style.left = Math.random() * (window.innerWidth - 35) + 'px';
+  c.style.top = Math.random() * (window.innerHeight - 35) + 'px';
+  document.body.appendChild(c);
+  c.addEventListener('click', () => collectCoin(c));
+  coins.push(c);
+}
 
-  <script>
-    /* cursor */
-    const cursor = document.getElementById('cursor');
-    window.addEventListener('mousemove', e => {
-      cursor.style.left = e.clientX + 'px';
-      cursor.style.top = e.clientY + 'px';
-    });
+function collectCoin(c) {
+  fragmentsCollected++;
+  localStorage.setItem('glimFragments', fragmentsCollected);
+  c.style.transform = 'scale(1.8)';
+  playCoinSound();
+  glimCheerAnimation();
+  glimBlink();
+  setTimeout(()=>c.remove(), 150);
+  storyDiv.innerText = storyLines[Math.min(storyIndex, storyLines.length-1)];
+  storyIndex++;
+  checkSecret();
+}
 
-    const home = document.getElementById('home');
-    const story = document.getElementById('story');
-    const glim = document.getElementById('glim');
-    const hum = document.getElementById('hum');
+for(let i=0;i<10;i++) spawnCoin();
 
-    function enterStory() {
-      home.classList.remove('active');
-      story.classList.add('active');
-      story.style.background = 'radial-gradient(circle at center, #02040a, #000)';
-      hum.volume = 0.35;
-      hum.play();
-    }
+// ====== Secret Chapter ======
+function checkSecret() {
+  if(fragmentsCollected >= 10 && !secretUnlocked) {
+    secretUnlocked = true;
+    localStorage.setItem('glimSecret', 'true');
+    setTimeout(() => {
+      storyDiv.innerText = secretLine;
+      spawnConfetti();
+      dynamicBackground();
+      glimHopAnimation();
+      glimCheerAnimation();
+      bonusSecretForVeterans();
+    }, 500);
+  }
+}
 
-    function goHome() {
-      hum.pause();
-      hum.currentTime = 0;
-      story.classList.remove('active');
-      home.classList.add('active');
-      chapters.forEach(c => c.classList.remove('visible'));
-      chapterIndex = 0;
-    }
+// ====== Confetti Effect ======
+function spawnConfetti() {
+  for(let i=0;i<120;i++) {
+    const conf = document.createElement('div');
+    conf.className = 'particle';
+    conf.style.width = conf.style.height = Math.random()*12+5+'px';
+    conf.style.left = Math.random()*window.innerWidth+'px';
+    conf.style.top = Math.random()*window.innerHeight+'px';
+    conf.style.background = `hsl(${Math.random()*360}, 80%, 60%)`;
+    document.body.appendChild(conf);
+    setTimeout(()=>conf.remove(), 4500);
+  }
+}
 
-    const chapters = document.querySelectorAll('.chapter');
-    let chapterIndex = 0;
+// ====== Glim Animations ======
+function glimHopAnimation(){
+  let hops = 0;
+  const hopInterval = setInterval(()=>{
+    glim.style.transform = `translateY(${Math.sin(hops)*-20}px)`;
+    hops += 0.5;
+    if(hops > 16) clearInterval(hopInterval);
+  }, 40);
+}
 
-    function revealNext() {
-      if (chapterIndex < chapters.length) {
-        chapters[chapterIndex].classList.add('visible');
-        glim.classList.add('react');
-        setTimeout(() => glim.classList.remove('react'), 500);
-        chapterIndex++;
+function glimCheerAnimation(){
+  let cheer = 0;
+  const cheerInterval = setInterval(()=>{
+    glim.style.transform = `translateY(${Math.sin(cheer)*-15}px) scale(${1 + Math.sin(cheer)*0.1}) rotate(${Math.sin(cheer)*10}deg)`;
+    cheer += 0.5;
+    if(cheer > 12) clearInterval(cheerInterval);
+  }, 40);
+}
 
-        // hidden chapter unlock
-        if (chapterIndex === chapters.length && localStorage.getItem('glim_seen')) {
-          const secret = document.createElement('div');
-          secret.className = 'chapter visible';
-          secret.innerText = 'glim remembers you.';
-          document.querySelector('.story').appendChild(secret);
-        }
-        localStorage.setItem('glim_seen', 'true');
-      }
-    }
-  </script>
+function glimBlink(){
+  glimEyes.style.transform += ' scaleY(0.1)';
+  setTimeout(()=>glimEyes.style.transform = glimEyes.style.transform.replace(' scaleY(0.1)',''), 150);
+}
+
+// ====== Dynamic Background ======
+function dynamicBackground(){
+  let hue = 0;
+  setInterval(()=>{
+    hue += 0.3;
+    document.body.style.background = `linear-gradient(${hue}deg, #0d0d0d, #1a1a2e)`;
+  },50);
+}
+
+// ====== Ambient Sound ======
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playChime(){
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  o.type = 'sine';
+  o.frequency.value = 440 + Math.random()*250;
+  g.gain.value = 0.1;
+  o.start();
+  o.stop(audioCtx.currentTime + 0.12);
+}
+setInterval(playChime, 6000);
+
+function playCoinSound(){
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  o.type = 'triangle';
+  o.frequency.value = 880 + Math.random()*250;
+  g.gain.value = 0.18;
+  o.start();
+  o.stop(audioCtx.currentTime + 0.15);
+}
+
+// ====== Mini Choices ======
+function randomChoice() {
+  const choice = Math.random();
+  if(choice < 0.5){
+    storyDiv.innerText = "Follow the shadow?";
+  } else {
+    storyDiv.innerText = "Chase the spark?";
+  }
+}
+setInterval(randomChoice, 10000);
+
+// ====== Hidden Puzzle Interaction ======
+document.addEventListener('keydown', e => {
+  if(e.key === 'g' && fragmentsCollected >= 3){
+    storyDiv.innerText = "A hidden memory glimmers...";
+    spawnConfetti();
+    playChime();
+    glimCheerAnimation();
+    glimBlink();
+  }
+});
+
+// ====== Veteran Visit Secret ======
+function bonusSecretForVeterans(){
+  if(visitCount > 3){
+    setTimeout(()=>{
+      storyDiv.innerText += "\nGlim smiles at your return, traveler.";
+      spawnConfetti();
+      glimCheerAnimation();
+      glimBlink();
+    }, 1000);
+  }
+}
+</script>
 </body>
 </html>
