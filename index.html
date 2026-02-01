@@ -2,175 +2,142 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Glim's Interactive Mini-Game</title>
+<title>Glim Mini-Game</title>
 <style>
   html, body {
     margin: 0;
     padding: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(120deg, #0d0d0d, #1a1a2e);
-    color: #fff;
-    font-family: 'Courier New', monospace;
     overflow: hidden;
-    cursor: none;
+    background: #111;
+    font-family: sans-serif;
+    user-select: none;
   }
-
-  #glim {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    background: url('https://i.imgur.com/Tk0nKfF.png') no-repeat center/contain;
-    pointer-events: none;
-    z-index: 10;
-    transition: transform 0.2s ease;
+  canvas {
+    display: block;
+    background: #1a1a1a;
   }
-
-  #glim-eyes {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: white;
-    box-shadow: 0 0 6px 2px yellow;
-    pointer-events: none;
-    z-index: 15;
-    transition: all 0.2s ease;
-  }
-
-  .coin {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: gold;
-    box-shadow: 0 0 14px yellow;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-  }
-
   #story {
     position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 600px;
-    text-align: center;
-    font-size: 1.3em;
-    line-height: 1.5em;
-    z-index: 5;
+    top: 10px;
+    left: 10px;
+    color: #fff;
+    font-size: 16px;
   }
 </style>
 </head>
 <body>
-<div id="glim"></div>
-<div id="glim-eyes"></div>
-<div id="story"></div>
+<canvas id="game"></canvas>
+<div id="story">Collect coins to see Glim's story!</div>
+
 <script>
-// ====== Variables ======
-const glim = document.getElementById('glim');
-const glimEyes = document.getElementById('glim-eyes');
-const storyDiv = document.getElementById('story');
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let mouse = { x: canvas.width/2, y: canvas.height/2 };
 let coins = [];
-let fragmentsCollected = JSON.parse(localStorage.getItem('glimFragments')) || 0;
-let storyIndex = 0;
-let secretUnlocked = localStorage.getItem('glimSecret') === 'true';
-let visitCount = parseInt(localStorage.getItem('glimVisits') || '0') + 1;
-localStorage.setItem('glimVisits', visitCount);
-
-const storyLines = [
-  "The light bends where you linger.",
-  "Glim whispers in shadows you follow.",
-  "Coins hide what you forgot.",
-  "A flicker of memory moves just beyond.",
-  "You are present, and Glim remembers."
+let collected = 0;
+let storyMessages = [
+  "Glim says hi! 👋",
+  "You found 1 coin!",
+  "Glim is getting excited! ✨",
+  "Hidden secret unlocked! Press G!",
+  "All coins collected! 🎉"
 ];
-const secretLine = "glim remembers you.";
+let storyIndex = 0;
 
-// ====== Cursor & Eyes ======
-document.addEventListener('mousemove', e => {
-  glim.style.left = e.clientX - 30 + 'px';
-  glim.style.top = e.clientY - 30 + 'px';
-  updateEyes(e.clientX, e.clientY);
+// Glim object
+let glim = {
+  x: canvas.width/2,
+  y: canvas.height/2,
+  size: 50,
+  color: "#ffcc00",
+  draw() {
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+    ctx.fill();
+    // eyes
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(this.x - 12, this.y - 10, 5, 0, Math.PI*2);
+    ctx.arc(this.x + 12, this.y - 10, 5, 0, Math.PI*2);
+    ctx.fill();
+  },
+  update() {
+    // move smoothly toward mouse
+    this.x += (mouse.x - this.x) * 0.1;
+    this.y += (mouse.y - this.y) * 0.1;
+  }
+};
+
+// coin class
+class Coin {
+  constructor() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = 20;
+    this.color = "#00ffcc";
+    this.collected = false;
+  }
+  draw() {
+    if (!this.collected) {
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+}
+
+// spawn 5 coins
+for(let i=0;i<5;i++) coins.push(new Coin());
+
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  glim.update();
+  glim.draw();
+  coins.forEach(c => c.draw());
+  requestAnimationFrame(draw);
+}
+
+canvas.addEventListener('mousemove', e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
 });
 
-function updateEyes(x, y){
-  glimEyes.style.left = x - 6 + 'px';
-  glimEyes.style.top = y - 6 + 'px';
-  glimEyes.style.boxShadow = `0 0 ${4 + Math.random()*4}px ${2 + Math.random()*2}px yellow`;
-  glimEyes.style.transform = `scale(${1 + Math.sin(Date.now()/100)*0.1})`;
-}
+// collect coins on click
+canvas.addEventListener('click', e => {
+  coins.forEach(c => {
+    if(!c.collected) {
+      let dx = e.clientX - c.x;
+      let dy = e.clientY - c.y;
+      if(Math.sqrt(dx*dx + dy*dy) < c.size) {
+        c.collected = true;
+        collected++;
+        storyIndex = Math.min(collected, storyMessages.length-1);
+        document.getElementById('story').innerText = storyMessages[storyIndex];
+        // Glim reaction: temporarily grow
+        glim.size = 70;
+        setTimeout(()=> glim.size=50, 300);
+      }
+    }
+  });
+});
 
-// ====== Coin Game ======
-function spawnCoin() {
-  const c = document.createElement('div');
-  c.className = 'coin';
-  c.style.left = Math.random() * (window.innerWidth - 35) + 'px';
-  c.style.top = Math.random() * (window.innerHeight - 35) + 'px';
-  document.body.appendChild(c);
-  c.addEventListener('click', () => collectCoin(c));
-  coins.push(c);
-}
-
-function collectCoin(c){
-  fragmentsCollected++;
-  localStorage.setItem('glimFragments', fragmentsCollected);
-  storyDiv.innerText = storyLines[Math.min(storyIndex, storyLines.length-1)];
-  storyIndex++;
-  glimCheer();
-  c.remove();
-  checkSecret();
-}
-
-for(let i=0;i<10;i++) spawnCoin();
-
-// ====== Glim Animations ======
-function glimCheer(){
-  glim.style.transform = 'translateY(-15px) scale(1.1)';
-  setTimeout(()=> glim.style.transform = '', 300);
-  glimBlink();
-}
-function glimBlink(){
-  glimEyes.style.transform += ' scaleY(0.1)';
-  setTimeout(()=>glimEyes.style.transform = glimEyes.style.transform.replace(' scaleY(0.1)',''), 150);
-}
-
-// ====== Secret ======
-function checkSecret(){
-  if(fragmentsCollected >= 10 && !secretUnlocked){
-    secretUnlocked = true;
-    localStorage.setItem('glimSecret','true');
-    setTimeout(()=>{
-      storyDiv.innerText = secretLine;
-      spawnConfetti();
-      glimCheer();
-      if(visitCount>3) storyDiv.innerText += '\nGlim smiles at your return, traveler.';
-    }, 500);
+// easter egg
+document.addEventListener('keydown', e => {
+  if(e.key.toLowerCase() === 'g' && collected >= 3) {
+    alert("Glim remembers you! 🌟");
   }
-}
+});
 
-function spawnConfetti(){
-  for(let i=0;i<50;i++){
-    const conf = document.createElement('div');
-    conf.style.position='absolute';
-    conf.style.width=conf.style.height=Math.random()*8+4+'px';
-    conf.style.left=Math.random()*window.innerWidth+'px';
-    conf.style.top=Math.random()*window.innerHeight+'px';
-    conf.style.background=`hsl(${Math.random()*360},80%,60%)`;
-    conf.style.borderRadius='50%';
-    document.body.appendChild(conf);
-    setTimeout(()=>conf.remove(),2000);
-  }
-}
+draw();
 
-// ====== Mini Puzzle ======
-document.addEventListener('keydown', e=>{
-  if(e.key==='g' && fragmentsCollected>=3){
-    storyDiv.innerText="A hidden memory glimmers...";
-    glimCheer();
-    spawnConfetti();
-  }
+window.addEventListener('resize', ()=>{
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 });
 </script>
 </body>
