@@ -2,143 +2,104 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Glim Mini-Game</title>
+<title>Glim Meme Coin</title>
 <style>
-  html, body {
+  body {
     margin: 0;
     padding: 0;
-    overflow: hidden;
-    background: #111;
+    background: linear-gradient(135deg,#1a1a1a,#222);
     font-family: sans-serif;
-    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    color: #fff;
+    overflow: hidden;
   }
-  canvas {
-    display: block;
-    background: #1a1a1a;
+  h1 {
+    margin-top: 40px;
+    font-size: 48px;
+    text-align: center;
+  }
+  #glim {
+    width: 100px;
+    height: 100px;
+    background: #ffcc00;
+    border-radius: 50%;
+    position: relative;
+    margin-top: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+  /* Eyes */
+  .eye {
+    width: 12px;
+    height: 12px;
+    background: #000;
+    border-radius: 50%;
+    position: absolute;
+    top: 30%;
+  }
+  .eye.left {
+    left: 25%;
+  }
+  .eye.right {
+    right: 25%;
   }
   #story {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: #fff;
-    font-size: 16px;
+    margin-top: 30px;
+    font-size: 18px;
+    text-align: center;
+    max-width: 500px;
   }
 </style>
 </head>
 <body>
-<canvas id="game"></canvas>
-<div id="story">Collect coins to see Glim's story!</div>
+
+<h1>GLIM — The Shiniest Meme Coin 🌟</h1>
+
+<div id="glim">
+  <div class="eye left"></div>
+  <div class="eye right"></div>
+</div>
+
+<div id="story">Click Glim to make him jump!</div>
 
 <script>
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const glim = document.getElementById('glim');
+const story = document.getElementById('story');
+let jumps = 0;
 
-let mouse = { x: canvas.width/2, y: canvas.height/2 };
-let coins = [];
-let collected = 0;
-let storyMessages = [
-  "Glim says hi! 👋",
-  "You found 1 coin!",
-  "Glim is getting excited! ✨",
-  "Hidden secret unlocked! Press G!",
-  "All coins collected! 🎉"
-];
-let storyIndex = 0;
+glim.addEventListener('click', () => {
+  // jump animation
+  glim.style.transform = 'translateY(-50px)';
+  setTimeout(() => {
+    glim.style.transform = 'translateY(0)';
+  }, 200);
 
-// Glim object
-let glim = {
-  x: canvas.width/2,
-  y: canvas.height/2,
-  size: 50,
-  color: "#ffcc00",
-  draw() {
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-    ctx.fill();
-    // eyes
-    ctx.fillStyle = "#000";
-    ctx.beginPath();
-    ctx.arc(this.x - 12, this.y - 10, 5, 0, Math.PI*2);
-    ctx.arc(this.x + 12, this.y - 10, 5, 0, Math.PI*2);
-    ctx.fill();
-  },
-  update() {
-    // move smoothly toward mouse
-    this.x += (mouse.x - this.x) * 0.1;
-    this.y += (mouse.y - this.y) * 0.1;
-  }
-};
+  // add sparkle effect
+  const sparkle = document.createElement('div');
+  sparkle.style.position = 'absolute';
+  sparkle.style.width = '10px';
+  sparkle.style.height = '10px';
+  sparkle.style.background = 'radial-gradient(circle,#fff,#ffcc00)';
+  sparkle.style.borderRadius = '50%';
+  sparkle.style.left = `${Math.random()*100}px`;
+  sparkle.style.top = `${Math.random()*100}px`;
+  glim.appendChild(sparkle);
+  setTimeout(()=> glim.removeChild(sparkle), 300);
 
-// coin class
-class Coin {
-  constructor() {
-    this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height;
-    this.size = 20;
-    this.color = "#00ffcc";
-    this.collected = false;
-  }
-  draw() {
-    if (!this.collected) {
-      ctx.fillStyle = this.color;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
-      ctx.fill();
-    }
-  }
-}
-
-// spawn 5 coins
-for(let i=0;i<5;i++) coins.push(new Coin());
-
-function draw() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  glim.update();
-  glim.draw();
-  coins.forEach(c => c.draw());
-  requestAnimationFrame(draw);
-}
-
-canvas.addEventListener('mousemove', e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
-});
-
-// collect coins on click
-canvas.addEventListener('click', e => {
-  coins.forEach(c => {
-    if(!c.collected) {
-      let dx = e.clientX - c.x;
-      let dy = e.clientY - c.y;
-      if(Math.sqrt(dx*dx + dy*dy) < c.size) {
-        c.collected = true;
-        collected++;
-        storyIndex = Math.min(collected, storyMessages.length-1);
-        document.getElementById('story').innerText = storyMessages[storyIndex];
-        // Glim reaction: temporarily grow
-        glim.size = 70;
-        setTimeout(()=> glim.size=50, 300);
-      }
-    }
-  });
-});
-
-// easter egg
-document.addEventListener('keydown', e => {
-  if(e.key.toLowerCase() === 'g' && collected >= 3) {
-    alert("Glim remembers you! 🌟");
-  }
-});
-
-draw();
-
-window.addEventListener('resize', ()=>{
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  // update story text
+  jumps++;
+  if(jumps === 1) story.innerText = "Glim jumps for you! 🐾";
+  else if(jumps === 3) story.innerText = "Wow! Glim is having fun! 🎉";
+  else if(jumps >= 5) story.innerText = "Glim loves you! Keep clicking! 💛";
 });
 </script>
+
 </body>
 </html>
