@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GLÏM</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at top, #0b0f1a, #000);
+      color: #eaeaea;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .grain::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url('https://grainy-gradients.vercel.app/noise.svg');
+      opacity: 0.08;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    header {
+      text-align: center;
+      padding: 80px 20px 40px;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 8vw, 5rem);
+      letter-spacing: 0.1em;
+      margin: 0;
+    }
+
+    .tagline {
+      opacity: 0.75;
+      margin-top: 12px;
+      font-weight: 300;
+    }
+
+    .glim-container {
+      display: flex;
+      justify-content: center;
+      margin: 60px 0;
+    }
+
+    .glim {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #9dfcff 0%, #1b3b4a 45%, #000 70%);
+      box-shadow: 0 0 40px rgba(157,252,255,0.35);
+      animation: pulse 3s infinite ease-in-out;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .glim::before, .glim::after {
+      content: "";
+      position: absolute;
+      top: 55px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #bfffff;
+      box-shadow: 0 0 12px #bfffff;
+    }
+
+    .glim::before { left: 60px; }
+    .glim::after { right: 60px; }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 35px rgba(157,252,255,0.3); }
+      50% { box-shadow: 0 0 55px rgba(157,252,255,0.6); }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 80px;
+    }
+
+    .btn {
+      padding: 14px 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.04);
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(6px);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      background: rgba(157,252,255,0.15);
+      box-shadow: 0 0 18px rgba(157,252,255,0.3);
+    }
+
+    /* GAME */
+    .game {
+      max-width: 520px;
+      margin: 0 auto 100px;
+      padding: 30px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+    }
+
+    .score {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      opacity: 0.85;
+    }
+
+    .tap-zone {
+      margin: 0 auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #bfffff 0%, #183645 40%, #000 70%);
+      box-shadow: 0 0 45px rgba(191,255,255,0.45);
+      cursor: pointer;
+      position: relative;
+      animation: pulse 2.5s infinite ease-in-out;
+    }
+
+    footer {
+      text-align: center;
+      opacity: 0.4;
+      padding-bottom: 40px;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body class="grain">
+
+  <header>
+    <h1>GLÏM</h1>
+    <div class="tagline">a small light in the dark</div>
+  </header>
+
+  <div class="glim-container">
+    <div class="glim" title="He just glows"></div>
+  </div>
+
+  <div class="buttons">
+    <a class="btn" href="#">BUY GLÏM</a>
+    <a class="btn" href="#">VIEW CHART</a>
+    <a class="btn" href="#">X</a>
+    <a class="btn" href="#">TELEGRAM</a>
+  </div>
+
+  <section class="game">
+    <div class="score">GLÏMS COLLECTED: <span id="score">0</span></div>
+    <div class="tap-zone" id="tap"></div>
+    <p style="opacity:.6; margin-top:18px">Tap the light. Don’t let it fade.</p>
+  </section>
+
+  <footer>
+    GLÏM exists. No promises. Just glow.
+  </footer>
+
+  <script>
+    let score = 0;
+    const scoreEl = document.getElementById('score');
+    const tap = document.getElementById('tap');
+
+    tap.addEventListener('click', () => {
+      score++;
+      scoreEl.textContent = score;
+      tap.style.transform = 'scale(0.95)';
+      setTimeout(() => tap.style.transform = 'scale(1)', 100);
+    });
+  </script>
+
+</body>
+</html>
